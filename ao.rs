@@ -1,4 +1,5 @@
-/* -*- Mode: js; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*- */
+/* -*- Mode: rust; tab-width: 4; indent-tabs-mode: nil; -*- */
+/* emacs-rust-mode: https://github.com/mozilla/rust/tree/master/src/etc/emacs */
 
 use core::float::{sqrt, abs};
 use core::rand::RngUtil;
