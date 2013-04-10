@@ -1,7 +1,5 @@
 /* -*- Mode: js; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*- */
 
-#[license = ""];
-
 use core::float::{sqrt, abs};
 use core::rand::RngUtil;
 use core::io::{Writer, WriterUtil};
