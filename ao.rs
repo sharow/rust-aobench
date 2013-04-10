@@ -275,7 +275,6 @@ fn render_line(width: uint, height: uint, _y: uint,
         } else {
             line.push(Pixel { r:0u8, g:0u8, b:0u8 });
         }
-
     }
     return line;
 }
