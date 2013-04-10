@@ -130,7 +130,7 @@ impl Object {
             Plane(position, normal) => {
                 let d = -vector::dot(&position, &normal);
                 let v = vector::dot(&ray.direction, &normal);
-                if abs(v) < 1.0e-17 { return false; }
+                if abs(v) < 1.0e-9 { return false; }
                 let t = -(vector::dot(&ray.origin, &normal) + d) / v;
                 if (t > 0.0) && (t < isect.distance) {
                     isect.distance = t;
@@ -169,13 +169,13 @@ fn ortho_basis(n: vector::Vector) -> [vector::Vector, ..3] {
 }
 
 fn ambient_occlusion(isect: &IntersectInfo,
+                     rng: @rand::Rng,
                      objects: &[Object]) -> float {
     let eps = 0.0001;
     let ntheta = NAO_SAMPLES;
     let nphi = NAO_SAMPLES;
     let mut ray_origin = isect.position + vector::scale(&isect.normal, eps);
     let basis = ortho_basis(isect.normal);
-    let rng = rand::Rng();
     let mut occlusion: float = 0.0;
     let mut occ_isect = ~IntersectInfo {
         distance: 1.0e+9,
@@ -237,6 +237,7 @@ fn render_line(width: uint, height: uint, _y: uint,
                nsubsamples: uint, objects: &[Object]) -> ~[Pixel] {
     let mut line = vec::with_capacity(width);
     let sample: float = nsubsamples as float;
+    let rng = rand::Rng();
     let w: float = width as float;
     let h: float = height as float;
     let y: float = _y as float;
@@ -263,7 +264,7 @@ fn render_line(width: uint, height: uint, _y: uint,
                     hit = (hit || h);
                 }
                 if hit {
-                    occlusion += ambient_occlusion(isect, objects);
+                    occlusion += ambient_occlusion(isect, rng, objects);
                 }
             }
         }
