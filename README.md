@@ -5,7 +5,7 @@ rust-aobench
 
 
 ## Build
-`$ rust build ao.rc`
+`$ rust build --opt-level 3 ao.rc`
 
 ## Run
 `$ ./ao    # single task`
