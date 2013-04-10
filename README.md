@@ -1,7 +1,7 @@
 rust-aobench
 ============
 
-[aobench][https://github.com/sharow/rust-aobench] @ Rust
+[aobench]:[] @ Rust
 
 
 ## Build
@@ -12,3 +12,4 @@ rust-aobench
 
 `$ ./ao 8  # spawn 8 tasks`
 
+[aobench]: https://github.com/sharow/rust-aobench "aobench"
