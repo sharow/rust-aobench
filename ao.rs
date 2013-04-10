@@ -228,10 +228,7 @@ impl Pixel {
     #[inline(always)]
     pub fn new_with_clamp(value: float, mag: float) -> Pixel {
         let v = (value * mag) as uint;
-        let i = match v {
-            0..255 => v as u8,
-            _      => if v > 255 { 255u8 } else { 0u8 }
-        };
+        let i = uint::min(255u, v) as u8;
         return Pixel { r:i, g:i, b:i };
     }
 }
@@ -368,7 +365,6 @@ fn main() {
     let args = os::args();
     let mut pixels;
     if args.len() >= 2u {
-        println(fmt!("%?", uint::from_str(args[1])));
         num_task = uint::from_str(args[1]).get();
     }
     if num_task == 1 {
