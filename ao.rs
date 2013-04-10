@@ -83,7 +83,7 @@ mod vector {
         #[inline(always)]
         pub fn normalized(&mut self) {
             let length = sqrt(dot(self, self));
-            if (length < -1.0e-17) || (length > 1.0e-17) {
+            if (length < -1.0e-9) || (length > 1.0e-9) {
                 self.x /= length;
                 self.y /= length;
                 self.z /= length;
