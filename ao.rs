@@ -204,7 +204,6 @@ fn ambient_occlusion(isect: &IntersectInfo,
             for objects.each |o| {
                 let h = o.intersect(&ray, occ_isect);
                 hit = (hit || h);
-                if hit { break; }
             }
             if hit { occlusion += 1.0; }
         }
