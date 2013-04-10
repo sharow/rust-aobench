@@ -1,6 +1,6 @@
 #[link(name = "aobench",
        vers = "0.1",
-	   author = "sharow",
+       author = "sharow",
        url = "https://github.com/sharow/rust-aobench")];
 
 #[license = "MIT"];
