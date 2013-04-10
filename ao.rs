@@ -363,15 +363,18 @@ fn main() {
                     Plane(vector::new(0.0, -0.5, 0.0), vector::new(0.0, 1.0, 0.0))];
     let width = 256u;
     let height = 256u;
-    //let pixels = render_singletask(width, height, NSUBSAMPLES, objects);
     let mut num_task = 1u;
-
     let args = os::args();
+    let mut pixels;
     if args.len() >= 2u {
         println(fmt!("%?", uint::from_str(args[1])));
         num_task = uint::from_str(args[1]).get();
     }
-    let pixels = render_multitask(width, height, NSUBSAMPLES, num_task, objects);
+    if num_task == 1 {
+        pixels = render_singletask(width, height, NSUBSAMPLES, objects);
+    } else {
+        pixels = render_multitask(width, height, NSUBSAMPLES, num_task, objects);
+    }
     saveppm("image.ppm", width, height, pixels);
 }
 
