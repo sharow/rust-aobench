@@ -193,20 +193,20 @@ fn ambient_occlusion(isect: &IntersectInfo,
             let z = float::sqrt(1.0f - theta * theta);
 
             // local -> global
-            let global = vector::Vector {
+            let direction = vector::Vector {
                 x: x * basis[0].x + y * basis[1].x + z * basis[2].x,
                 y: x * basis[0].y + y * basis[1].y + z * basis[2].y,
                 z: x * basis[0].z + y * basis[1].z + z * basis[2].z
             };
             let ray = Ray { origin: ray_origin,
-                            direction: global };
+                            direction: direction };
             occ_isect.distance = 1.0e+9;
-            let mut hit = false;
             for objects.each |o| {
-                let h = o.intersect(&ray, occ_isect);
-                hit = (hit || h);
+                if o.intersect(&ray, occ_isect) {
+                    occlusion += 1.0;
+                    break;
+                }
             }
-            if hit { occlusion += 1.0; }
         }
     }
     let theta = ntheta as float;
