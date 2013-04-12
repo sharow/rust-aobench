@@ -126,6 +126,7 @@ impl Object {
                         return true;
                     }
                 }
+                return false;
             },
             Plane(position, normal) => {
                 let d = -vector::dot(&position, &normal);
@@ -138,9 +139,9 @@ impl Object {
                     isect.normal = normal;
                     return true;
                 }
+                return false;
             }
         }
-        return false;
     }
 }
 
