@@ -125,6 +125,7 @@ impl Object {
                         return true;
                     }
                 }
+                return false;
             },
             Plane(position, normal) => {
                 let d = -vector::dot(&position, &normal);
@@ -137,9 +138,9 @@ impl Object {
                     isect.normal = normal;
                     return true;
                 }
+                return false;
             }
         }
-        return false;
     }
 }
 
@@ -181,11 +182,12 @@ fn ambient_occlusion(isect: &IntersectInfo,
         position: vector::new(0.0, 0.0, 0.0),
         normal: vector::new(0.0, 1.0, 0.0)
     };
+    let tau: float = 2.0f * float::consts::pi;
 
     for uint::range(0u, ntheta) |_| {
         for uint::range(0u, nphi) |_| {
             let theta = sqrt(rng.gen_float());
-            let phi = 2.0f * float::consts::pi * rng.gen_float();
+            let phi = tau * rng.gen_float();
 
             let x = float::cos(phi) * theta;
             let y = float::sin(phi) * theta;
