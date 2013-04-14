@@ -288,63 +288,95 @@ fn render_singletask(width: uint, height: uint, nsubsamples: uint, objects: ~[Ob
     return vec::concat(lines);
 }
 
+
+type RenderedPixels = (uint, ~[Pixel]);
+
 struct RenderTask {
     task_id: uint,
     width: uint,
     height: uint,
-    run_y0: uint,
-    run_y1: uint,
     nsubsamples: uint,
     objects: std::arc::ARC<~[Object]>,
-    channel: Chan<~[Pixel]>
+    sender: Chan<RenderedPixels>,
+    receiver: Port<uint>
 }
 
 fn render_multitask_run(rt: ~RenderTask) {
-    println(fmt!(" Task %u started (%u - %u).", rt.task_id, rt.run_y0, rt.run_y1));
-    let mut lines = vec::with_capacity((rt.run_y1 - rt.run_y0) * rt.width);
+    println(fmt!(" Task %u: started.", rt.task_id));
     let objects = copy *std::arc::get(&rt.objects);
-    for uint::range(rt.run_y0, rt.run_y1) |y| {
-        let line = render_line(rt.width, rt.height, y, rt.nsubsamples, objects);
-        lines.push(line);
+    loop {
+        let line = rt.receiver.recv();
+        if line >= rt.height {
+            break;
+        }
+        //println(fmt!(" Task %u: start rendering: line = %u", rt.task_id, line));
+        let pixels = render_line(rt.width, rt.height, line, rt.nsubsamples, objects);
+        rt.sender.send((line, pixels));
     }
-    println(fmt!(" Task %u finished (%u - %u).", rt.task_id, rt.run_y0, rt.run_y1));
-    rt.channel.send(vec::concat(lines));
+    println(fmt!(" Task %u: finished.", rt.task_id));
 }
 
 fn render_multitask(width: uint, height: uint, nsubsamples: uint,
                     num_task: uint, objects: ~[Object]) -> ~[Pixel] {
-    let run_height = height / num_task;
-    let mut run = 0u;
     let objects_arc = std::arc::ARC(objects);
-    let mut ports: ~[Port<~[Pixel]>] = ~[];
+    let mut receivers: ~[Port<RenderedPixels>] = ~[];
+    let mut senders: ~[Chan<uint>] = ~[];
 
     println(fmt!("Spawn %u tasks.", num_task));
     for uint::range(0u, num_task) |i| {
-        let (port, chan): (Port<~[Pixel]>, Chan<~[Pixel]>) = comm::stream();
+        let (pixel_receiver, pixel_sender):
+            (Port<RenderedPixels>, Chan<RenderedPixels>) = comm::stream();
+        let (line_receiver, line_sender):
+            (Port<uint>, Chan<uint>) = comm::stream();
         let rt = ~RenderTask {
             task_id: i,
             width: width,
             height: height,
-            run_y0: run,
-            run_y1: if i == (num_task-1) {height} else { run + run_height },
             nsubsamples: nsubsamples,
             objects: objects_arc.clone(),
-            channel: chan
+            sender: pixel_sender,
+            receiver: line_receiver
         };
+        receivers.push(pixel_receiver);
+        senders.push(line_sender);
         task::spawn_with(rt, render_multitask_run);
-        ports.push(port);
-        run += run_height;
     }
 
+    struct RenderResult { pixels: ~[Pixel] };
+    let mut result_store:~[RenderResult] = vec::with_capacity(height);
+    for uint::range(0u, height) |_| {
+        result_store.push(RenderResult{ pixels: ~[] });
+    }
+    // start render
+    let mut rendered_line = 0u;
+    let mut assigned_line = 0u;
+    for uint::range(0u, num_task) |i| {
+        senders[i].send(assigned_line);
+        assigned_line += 1;
+    }
+    while rendered_line < height {
+        for uint::range(0u, num_task) |i| {
+            match receivers[i].try_recv() {
+                Some((line, pixels)) => {
+                    //println(fmt!(" line %u received from Task %u", line, i));
+                    result_store[line].pixels = pixels;
+                    rendered_line += 1;
+                    if rendered_line < height {
+                        senders[i].send(assigned_line);
+                        assigned_line += 1;
+                    } else {
+                        senders[i].send(height); // meaning end task
+                    }
+                }
+                None => {
+                    /* rendering now */
+                }
+            }
+        }
+    }
+    /* merge result */
     let mut pixels: ~[Pixel] = ~[];
-
-    for ports.each() |p| {
-        let chunk = p.recv();
-        io::println(fmt!(" Received chunk, size: %? bytes", chunk.len()));
-        pixels.push_all(chunk);
-    }
-
-    //let mut lines = vec::with_capacity(height);
+    for result_store.each() |t| { pixels.push_all(t.pixels); }
     return pixels;
 }
 
