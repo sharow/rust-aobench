@@ -367,7 +367,7 @@ fn render_multitask(width: uint, height: uint, nsubsamples: uint,
                     } else {
                         senders[i].send(height); // meaning end task
                     }
-                }
+                },
                 None => {
                     /* rendering now */
                 }
