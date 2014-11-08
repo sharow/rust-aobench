@@ -13,8 +13,6 @@ static NAO_SAMPLES: uint = 8;
 static NSUBSAMPLES: uint = 2;
 
 mod vector3 {
-    use std::num;
-
     pub struct Vector3 {
         pub x: f32,
         pub y: f32,
