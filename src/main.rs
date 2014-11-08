@@ -6,8 +6,6 @@
 use std::cmp;
 use std::num;
 use std::rand::{task_rng, Rng};
-
-#[allow(unused_imports)]
 use std::io::{BufferedWriter, Write, File};
 
 
