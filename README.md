@@ -5,11 +5,15 @@ rust-aobench
 
 
 ## Build
-`$ rust build --opt-level 3 ao.rc`
+```
+$ rustc -v
+rustc 0.12.0-dev
+$ cargo build
+```
 
 ## Run
-`$ ./ao    # single task`
-
-`$ ./ao 8  # spawn 8 tasks`
+```
+$ ./target/aobench
+```
 
 [aobench]: http://code.google.com/p/aobench/ "aobench"
