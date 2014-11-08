@@ -1,7 +1,7 @@
 rust-aobench
 ============
 
-![aobench](https://raw.githubusercontent.com/sharow/rust-aobench/master/target/examples/image.png)
+![aobench](https://raw.githubusercontent.com/sharow/rust-aobench/master/target/imgs/image.png)
 
 [aobench](http://code.google.com/p/aobench/) @ Rust
 
