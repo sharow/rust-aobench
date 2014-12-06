@@ -9,13 +9,13 @@ rust-aobench
 ## Build & Run
 ```
 $ rustc -v
-rustc 0.12.0-dev
+rustc 0.13.0-nightly
 
 $ rustc --opt-level 3 -o target/aobench src/main.rs
 $ ./target/aobench
 
 ### if you have Cargo
-$ cargo run
+$ cargo run --release
 ```
 
 
