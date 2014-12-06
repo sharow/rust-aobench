@@ -6,7 +6,7 @@ use std::cmp;
 use std::num;
 use std::rand::{task_rng, Rng};
 use std::io::{BufferedWriter, File};
-
+use std::num::Float;
 
 static NAO_SAMPLES: uint = 8;
 static NSUBSAMPLES: uint = 2;
@@ -110,7 +110,7 @@ enum Object {
 impl Object {
     pub fn intersect(&self, ray: &Ray, isect: &mut IntersectInfo) -> bool {
         match *self {
-            Sphere(position, radius) => {
+            Object::Sphere(position, radius) => {
                 let rs = ray.origin - position;
                 let B = vector3::dot(&rs, &ray.direction);
                 let C = vector3::dot(&rs, &rs) - radius * radius;
@@ -127,7 +127,7 @@ impl Object {
                 }
                 return false;
             },
-            Plane(position, normal) => {
+            Object::Plane(position, normal) => {
                 let d = -vector3::dot(&position, &normal);
                 let v = vector3::dot(&ray.direction, &normal);
                 if v.abs() < 1.0e-9f32 { return false; }
@@ -289,18 +289,18 @@ fn saveppm(filename: &str, width: uint, height: uint, pixels: Vec<Pixel>) {
     let head = format!("P6\n{0} {1}\n255\n", width, height);
     writer.write_str(head.as_slice());
     for pixel in pixels.iter() {
-        writer.write([pixel.r, pixel.g, pixel.b]);
+        writer.write(&[pixel.r, pixel.g, pixel.b]);
     };
 }
 
 fn main() {
-    let objects = [Sphere(vector3::new(-2.0, 0.0, -3.5), 0.5),
-                   Sphere(vector3::new(-0.5, 0.0, -3.0), 0.5),
-                   Sphere(vector3::new( 1.0, 0.0, -2.2), 0.5),
-                   Plane(vector3::new(0.0, -0.5, 0.0), vector3::new(0.0, 1.0, 0.0))];
+    let objects = [Object::Sphere(vector3::new(-2.0, 0.0, -3.5), 0.5),
+                   Object::Sphere(vector3::new(-0.5, 0.0, -3.0), 0.5),
+                   Object::Sphere(vector3::new( 1.0, 0.0, -2.2), 0.5),
+                   Object::Plane(vector3::new(0.0, -0.5, 0.0), vector3::new(0.0, 1.0, 0.0))];
     let width = 256u;
     let height = 256u;
-    let pixels = render(width, height, NSUBSAMPLES, objects);
+    let pixels = render(width, height, NSUBSAMPLES, &objects);
     saveppm("image.ppm", width, height, pixels);
 }
 
