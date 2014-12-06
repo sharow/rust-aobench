@@ -1,12 +1,11 @@
 /* -*- Mode: rust; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*- */
 
 #![allow(unnecessary_parens)]
-#![allow(unused_imports)]
 
 use std::cmp;
 use std::num;
 use std::rand::{task_rng, Rng};
-use std::io::{BufferedWriter, Write, File};
+use std::io::{BufferedWriter, File};
 
 
 static NAO_SAMPLES: uint = 8;
@@ -248,12 +247,12 @@ fn render(width: uint, height: uint,
             let mut occlusion = 0.0f32;
             for _u in range(0u, nsubsamples) {
                 for _v in range(0u, nsubsamples) {
-                    let x: f32 = _x as f32;
-                    let y: f32 = _y as f32;
-                    let u: f32 = _u as f32;
-                    let v: f32 = _v as f32;
-                    let px: f32 = (x + (u / sample) - (w / 2.0f32)) / (w / 2.0f32);
-                    let py: f32 = -(y + (v / sample) - (h / 2.0f32)) / (h / 2.0f32);
+                    let x = _x as f32;
+                    let y = _y as f32;
+                    let u = _u as f32;
+                    let v = _v as f32;
+                    let px = (x + (u / sample) - (w / 2.0)) / (w / 2.0);
+                    let py = -(y + (v / sample) - (h / 2.0)) / (h / 2.0);
                     let ray = Ray { origin: vector3::new(0.0, 0.0, 0.0),
                                     direction: vector3::new_normal(px, py, -1.0) };
 
