@@ -1,29 +1,31 @@
 /* -*- Mode: rust; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*- */
 
-#![allow(unnecessary_parens)]
+#![allow(unused_parens)]
 
 use std::cmp;
-use std::num;
+//use std::num;
 use std::rand::{task_rng, Rng};
 use std::io::{BufferedWriter, File};
-use std::num::Float;
+use std::num::{Float, FloatMath};
 
 static NAO_SAMPLES: uint = 8;
 static NSUBSAMPLES: uint = 2;
 
 mod vector3 {
+    use std::num::Float;
+    
     pub struct Vector3 {
         pub x: f32,
         pub y: f32,
         pub z: f32
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
         Vector3 { x: x, y: y, z: z }
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn new_normal(x: f32, y: f32, z: f32) -> Vector3 {
         let mut v = Vector3 { x: x, y: y, z: z };
         v.normalized();
@@ -31,7 +33,7 @@ mod vector3 {
     }
 
     // operator +
-    #[inline(always)]
+    #[inline]
     impl Add<Vector3, Vector3> for Vector3 {
         fn add(&self, other: &Vector3) -> Vector3 {
             Vector3 { x: self.x + other.x,
@@ -41,7 +43,7 @@ mod vector3 {
     }
 
     // operator -
-    #[inline(always)]
+    #[inline]
     impl Sub<Vector3, Vector3> for Vector3 {
         fn sub(&self, other: &Vector3) -> Vector3 {
             Vector3 { x: self.x - other.x,
@@ -51,7 +53,7 @@ mod vector3 {
     }
 
     // operator *
-    #[inline(always)]
+    #[inline]
     impl Mul<Vector3, Vector3> for Vector3 {
         fn mul(&self, other: &Vector3) -> Vector3 {
             Vector3 { x: self.x * other.x,
@@ -60,25 +62,25 @@ mod vector3 {
         }
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn dot(v0: &Vector3, v1: &Vector3) -> f32 {
         v0.x * v1.x + v0.y * v1.y + v0.z * v1.z
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn cross(v0: &Vector3, v1: &Vector3) -> Vector3 {
         Vector3 { x: v0.y * v1.z - v0.z * v1.y,
                   y: v0.z * v1.x - v0.x * v1.z,
                   z: v0.x * v1.y - v0.y * v1.x }
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn scale(v: &Vector3, s: f32) -> Vector3 {
         Vector3 { x: v.x * s, y: v.y * s, z: v.z * s }
     }
 
     impl Vector3 {
-        #[inline(always)]
+        #[inline]
         pub fn normalized(&mut self) {
             let length = dot(self, self).sqrt();
             if (length < -1.0e-9) || (length > 1.0e-9) {
@@ -146,7 +148,7 @@ impl Object {
 
 // ---
 
-#[inline(always)]
+#[inline]
 fn ortho_basis(n: vector3::Vector3) -> [vector3::Vector3, ..3] {
     // 'if' is not statement. it's expression.
     let basis1 =
@@ -168,6 +170,7 @@ fn ortho_basis(n: vector3::Vector3) -> [vector3::Vector3, ..3] {
     return [basis0, basis1, n];
 }
 
+#[allow(deprecated)]
 fn ambient_occlusion(isect: &IntersectInfo,
                      objects: &[Object]) -> f32 {
     let eps = 0.0001f32;
@@ -181,7 +184,7 @@ fn ambient_occlusion(isect: &IntersectInfo,
         position: vector3::new(0.0, 0.0, 0.0),
         normal: vector3::new(0.0, 1.0, 0.0)
     };
-    let tau: f32 = 2.0f32 * num::Float::pi();
+    let tau: f32 = Float::pi();  // f32::consts::PI;
     let mut rng = task_rng();
 
     for _ in range(0u, ntheta) {
@@ -222,13 +225,13 @@ struct Pixel {
 
 impl Pixel {
     /*
-    #[inline(always)]
+    #[inline]
     pub fn new(r:u8, g:u8, b:u8) -> Pixel {
         Pixel { r:r, g:g, b:b }
     }
     */
 
-    #[inline(always)]
+    #[inline]
     pub fn new_with_clamp(value: f32, mag: f32) -> Pixel {
         let v = (value * mag) as uint;
         let i = cmp::min(255u, v) as u8;
