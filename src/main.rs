@@ -239,7 +239,7 @@ impl Pixel {
 
 fn render(width: u32, height: u32,
           nsubsamples: u32, objects: &[Object]) -> Vec<Pixel> {
-    let mut pixels: Vec<Pixel> = Vec::with_capacity(width as usize);
+    let mut pixels: Vec<Pixel> = Vec::with_capacity((width * height) as usize);
     let sample: f32 = nsubsamples as f32;
     let w: f32 = width as f32;
     let h: f32 = height as f32;
