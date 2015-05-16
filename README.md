@@ -5,17 +5,23 @@ rust-aobench
 
 [aobench](http://code.google.com/p/aobench/) @ Rust
 
+## Cargo dependencies
+rand = "0.3.8"
+
 
 ## Build & Run
 ```
 $ rustc -v
-rustc 0.13.0-nightly
+rustc 1.0.0-beta.5 (built 2015-05-14)
 
-$ rustc --opt-level 3 -o target/aobench src/main.rs
-$ ./target/aobench
-
-### if you have Cargo
 $ cargo run --release
+Compiling libc v0.1.7
+Compiling rand v0.3.8
+Compiling aobench v0.0.2 (file:///....)
+Running `target/release/aobench`
+
+$ convert image.ppm image.png
+
 ```
 
 
