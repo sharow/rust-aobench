@@ -5,14 +5,9 @@
 extern crate rand;
 
 use std::cmp;
-use std::io::prelude::*;
-use std::fs::File;
-use std::io::BufWriter;
-use rand::Rng;
 
 static NAO_SAMPLES: u32 = 8;
 static NSUBSAMPLES: u32 = 2;
-
 
 mod vector3 {
     use std::ops::{Add, Sub, Mul};
@@ -96,6 +91,18 @@ mod vector3 {
             }
         }
     }
+    impl Clone for Vector3 {
+        fn clone(&self) -> Self {
+            Vector3 { x: self.x, y: self.y, z: self.z }
+        }
+        fn clone_from(&mut self, source: &Self) {
+            self.x = source.x;
+            self.y = source.y;
+            self.z = source.z;
+        }
+    }
+
+    impl Copy for Vector3 { }
 }
 
 struct Ray {
@@ -118,35 +125,34 @@ enum Object {
 impl Object {
     pub fn intersect(&self, ray: &Ray, isect: &mut IntersectInfo) -> bool {
         match self {
-            &Object::Sphere(position, radius) => {
-                //    let rs = ray.origin - position;
-                //    let B = vector3::dot(&rs, &ray.direction);
-                //    let C = vector3::dot(&rs, &rs) - radius * radius;
-                //    let D = B * B - C;
-                //    if D > 0.0 {
-                //        let t = -B - D.sqrt();
-                //        if (t > 0.0) && (t < isect.distance) {
-                //            isect.distance = t;
-                //            isect.position = ray.origin + vector3::scale(&ray.direction, t);
-                //            isect.normal = isect.position - position;
-                //            isect.normal.normalized();
-                //            return true;
-                //        }
-                //    }
-                //    return false;
+            &Object::Sphere(ref position, radius) => {
+                let rs = ray.origin - *position;
+                let B = vector3::dot(&rs, &ray.direction);
+                let C = vector3::dot(&rs, &rs) - radius * radius;
+                let D = B * B - C;
+                if D > 0.0 {
+                    let t = -B - D.sqrt();
+                    if (t > 0.0) && (t < isect.distance) {
+                        isect.distance = t;
+                        isect.position = ray.origin + vector3::scale(&ray.direction, t);
+                        isect.normal = isect.position - *position;
+                        isect.normal.normalized();
+                        return true;
+                    }
+                }
                 return false;
             },
-            &Object::Plane(position, normal) => {
-                //let d = -vector3::dot(&position, &normal);
-                //let v = vector3::dot(&ray.direction, &normal);
-                //if v.abs() < 1.0e-9f32 { return false; }
-                //let t = -(vector3::dot(&ray.origin, &normal) + d) / v;
-                //if (t > 0.0) && (t < isect.distance) {
-                //    isect.distance = t;
-                //    isect.position = ray.origin + vector3::scale(&ray.direction, t);
-                //    isect.normal = normal;
-                //    return true;
-                //}
+            &Object::Plane(ref position, ref normal) => {
+                let d = -vector3::dot(&position, &normal);
+                let v = vector3::dot(&ray.direction, &normal);
+                if v.abs() < 1.0e-9f32 { return false; }
+                let t = -(vector3::dot(&ray.origin, &normal) + d) / v;
+                if (t > 0.0) && (t < isect.distance) {
+                    isect.distance = t;
+                    isect.position = ray.origin + vector3::scale(&ray.direction, t);
+                    isect.normal = *normal;
+                    return true;
+                }
                 return false;
             }
         }
@@ -175,7 +181,7 @@ fn ortho_basis(n: vector3::Vector3) -> [vector3::Vector3; 3] {
 }
 
 #[allow(deprecated)]
-fn ambient_occlusion(isect: &IntersectInfo,
+fn ambient_occlusion(isect: &mut IntersectInfo,
                      objects: &[Object]) -> f32 {
     let eps = 0.0001f32;
     let ntheta = NAO_SAMPLES;
@@ -290,7 +296,10 @@ fn render(width: u32, height: u32,
 
 #[allow(unused_must_use)]
 fn saveppm(filename: &str, width: u32, height: u32, pixels: Vec<Pixel>) {
-    use std::io::Write;
+    use std::io::prelude::*;
+    use std::fs::File;
+    use std::io::BufWriter;
+
     let f = File::create(filename).unwrap();
     let mut w = BufWriter::new(f);
     let head = format!("P6\n{0} {1}\n255\n", width, height);
