@@ -14,6 +14,7 @@ rand = "0.3.8"
 $ rustc -v
 rustc 1.0.0-beta.5 (built 2015-05-14)
 
+$ cargo update
 $ cargo run --release
 Compiling libc v0.1.7
 Compiling rand v0.3.8
