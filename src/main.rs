@@ -2,17 +2,20 @@
 
 #![allow(unused_parens)]
 
-use std::cmp;
-//use std::num;
-use std::rand::{task_rng, Rng};
-use std::io::{BufferedWriter, File};
-use std::num::{Float, FloatMath};
+extern crate rand;
 
-static NAO_SAMPLES: uint = 8;
-static NSUBSAMPLES: uint = 2;
+use std::cmp;
+use std::io::prelude::*;
+use std::fs::File;
+use std::io::BufWriter;
+use rand::Rng;
+
+static NAO_SAMPLES: u32 = 8;
+static NSUBSAMPLES: u32 = 2;
+
 
 mod vector3 {
-    use std::num::Float;
+    use std::ops::{Add, Sub, Mul};
     
     pub struct Vector3 {
         pub x: f32,
@@ -34,8 +37,9 @@ mod vector3 {
 
     // operator +
     #[inline]
-    impl Add<Vector3, Vector3> for Vector3 {
-        fn add(&self, other: &Vector3) -> Vector3 {
+    impl Add for Vector3 {
+        type Output = Vector3;
+        fn add(self, other: Vector3) -> Vector3 {
             Vector3 { x: self.x + other.x,
                       y: self.y + other.y,
                       z: self.z + other.z }
@@ -44,8 +48,9 @@ mod vector3 {
 
     // operator -
     #[inline]
-    impl Sub<Vector3, Vector3> for Vector3 {
-        fn sub(&self, other: &Vector3) -> Vector3 {
+    impl Sub for Vector3 {
+        type Output = Vector3;
+        fn sub(self, other: Vector3) -> Vector3 {
             Vector3 { x: self.x - other.x,
                       y: self.y - other.y,
                       z: self.z - other.z }
@@ -54,8 +59,9 @@ mod vector3 {
 
     // operator *
     #[inline]
-    impl Mul<Vector3, Vector3> for Vector3 {
-        fn mul(&self, other: &Vector3) -> Vector3 {
+    impl Mul for Vector3 {
+        type Output = Vector3;
+        fn mul(self, other: Vector3) -> Vector3 {
             Vector3 { x: self.x * other.x,
                       y: self.y * other.y,
                       z: self.z * other.z }
@@ -111,46 +117,44 @@ enum Object {
 #[allow(non_snake_case)]
 impl Object {
     pub fn intersect(&self, ray: &Ray, isect: &mut IntersectInfo) -> bool {
-        match *self {
-            Object::Sphere(position, radius) => {
-                let rs = ray.origin - position;
-                let B = vector3::dot(&rs, &ray.direction);
-                let C = vector3::dot(&rs, &rs) - radius * radius;
-                let D = B * B - C;
-                if D > 0.0 {
-                    let t = -B - D.sqrt();
-                    if (t > 0.0) && (t < isect.distance) {
-                        isect.distance = t;
-                        isect.position = ray.origin + vector3::scale(&ray.direction, t);
-                        isect.normal = isect.position - position;
-                        isect.normal.normalized();
-                        return true;
-                    }
-                }
+        match self {
+            &Object::Sphere(position, radius) => {
+                //    let rs = ray.origin - position;
+                //    let B = vector3::dot(&rs, &ray.direction);
+                //    let C = vector3::dot(&rs, &rs) - radius * radius;
+                //    let D = B * B - C;
+                //    if D > 0.0 {
+                //        let t = -B - D.sqrt();
+                //        if (t > 0.0) && (t < isect.distance) {
+                //            isect.distance = t;
+                //            isect.position = ray.origin + vector3::scale(&ray.direction, t);
+                //            isect.normal = isect.position - position;
+                //            isect.normal.normalized();
+                //            return true;
+                //        }
+                //    }
+                //    return false;
                 return false;
             },
-            Object::Plane(position, normal) => {
-                let d = -vector3::dot(&position, &normal);
-                let v = vector3::dot(&ray.direction, &normal);
-                if v.abs() < 1.0e-9f32 { return false; }
-                let t = -(vector3::dot(&ray.origin, &normal) + d) / v;
-                if (t > 0.0) && (t < isect.distance) {
-                    isect.distance = t;
-                    isect.position = ray.origin + vector3::scale(&ray.direction, t);
-                    isect.normal = normal;
-                    return true;
-                }
+            &Object::Plane(position, normal) => {
+                //let d = -vector3::dot(&position, &normal);
+                //let v = vector3::dot(&ray.direction, &normal);
+                //if v.abs() < 1.0e-9f32 { return false; }
+                //let t = -(vector3::dot(&ray.origin, &normal) + d) / v;
+                //if (t > 0.0) && (t < isect.distance) {
+                //    isect.distance = t;
+                //    isect.position = ray.origin + vector3::scale(&ray.direction, t);
+                //    isect.normal = normal;
+                //    return true;
+                //}
                 return false;
             }
         }
     }
 }
 
-// ---
-
 #[inline]
-fn ortho_basis(n: vector3::Vector3) -> [vector3::Vector3, ..3] {
-    // 'if' is not statement. it's expression.
+fn ortho_basis(n: vector3::Vector3) -> [vector3::Vector3; 3] {
     let basis1 =
         if (n.x < 0.6) && (n.x > -0.6) {
             vector3::new(1.0, 0.0, 0.0)
@@ -184,13 +188,12 @@ fn ambient_occlusion(isect: &IntersectInfo,
         position: vector3::new(0.0, 0.0, 0.0),
         normal: vector3::new(0.0, 1.0, 0.0)
     };
-    let tau: f32 = Float::pi();  // f32::consts::PI;
-    let mut rng = task_rng();
+    let tau: f32 = std::f32::consts::PI;
 
-    for _ in range(0u, ntheta) {
-        for _ in range(0u, nphi) {
-            let theta = rng.gen::<f32>().sqrt();
-            let phi = tau * rng.gen::<f32>();
+    for _ in 0..ntheta {
+        for _ in 0..nphi {
+            let theta = rand::random::<f32>().sqrt();
+            let phi = tau * rand::random::<f32>();
 
             let x = phi.cos() * theta;
             let y = phi.sin() * theta;
@@ -233,23 +236,23 @@ impl Pixel {
 
     #[inline]
     pub fn new_with_clamp(value: f32, mag: f32) -> Pixel {
-        let v = (value * mag) as uint;
-        let i = cmp::min(255u, v) as u8;
+        let v = (value * mag) as u32;
+        let i = cmp::min(255, v) as u8;
         return Pixel { r:i, g:i, b:i };
     }
 }
 
-fn render(width: uint, height: uint,
-          nsubsamples: uint, objects: &[Object]) -> Vec<Pixel> {
-    let mut pixels: Vec<Pixel> = Vec::with_capacity(width);
+fn render(width: u32, height: u32,
+          nsubsamples: u32, objects: &[Object]) -> Vec<Pixel> {
+    let mut pixels: Vec<Pixel> = Vec::with_capacity(width as usize);
     let sample: f32 = nsubsamples as f32;
     let w: f32 = width as f32;
     let h: f32 = height as f32;
-    for _y in range(0u, height) {
-        for _x in range(0u, width) {
+    for _y in 0u32..height {
+        for _x in 0u32..width {
             let mut occlusion = 0.0f32;
-            for _u in range(0u, nsubsamples) {
-                for _v in range(0u, nsubsamples) {
+            for _u in 0u32..nsubsamples {
+                for _v in 0u32..nsubsamples {
                     let x = _x as f32;
                     let y = _y as f32;
                     let u = _u as f32;
@@ -286,13 +289,14 @@ fn render(width: uint, height: uint,
 }
 
 #[allow(unused_must_use)]
-fn saveppm(filename: &str, width: uint, height: uint, pixels: Vec<Pixel>) {
-    let file = File::create(&Path::new(filename));
-    let mut writer = BufferedWriter::new(file);
+fn saveppm(filename: &str, width: u32, height: u32, pixels: Vec<Pixel>) {
+    use std::io::Write;
+    let f = File::create(filename).unwrap();
+    let mut w = BufWriter::new(f);
     let head = format!("P6\n{0} {1}\n255\n", width, height);
-    writer.write_str(head.as_slice());
+    w.write_all(head.as_bytes());
     for pixel in pixels.iter() {
-        writer.write(&[pixel.r, pixel.g, pixel.b]);
+        w.write(&[pixel.r, pixel.g, pixel.b]);
     };
 }
 
@@ -301,8 +305,8 @@ fn main() {
                    Object::Sphere(vector3::new(-0.5, 0.0, -3.0), 0.5),
                    Object::Sphere(vector3::new( 1.0, 0.0, -2.2), 0.5),
                    Object::Plane(vector3::new(0.0, -0.5, 0.0), vector3::new(0.0, 1.0, 0.0))];
-    let width = 256u;
-    let height = 256u;
+    let width = 256u32;
+    let height = 256u32;
     let pixels = render(width, height, NSUBSAMPLES, &objects);
     saveppm("image.ppm", width, height, pixels);
 }

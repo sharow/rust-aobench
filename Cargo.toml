@@ -1,5 +1,7 @@
 [package]
-
 name = "aobench"
 version = "0.0.1"
 authors = ["sharow <shirowmiura@gmail.com>"]
+
+[dependencies]
+rand = "0.3.8"
