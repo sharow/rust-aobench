@@ -10,7 +10,7 @@ static NAO_SAMPLES: u32 = 8;
 static NSUBSAMPLES: u32 = 2;
 
 mod vector3 {
-    use std::ops::{Add, Sub, Mul};
+    use std::ops::{Add, Sub};
     
     pub struct Vector3 {
         pub x: f32,
@@ -49,17 +49,6 @@ mod vector3 {
             Vector3 { x: self.x - other.x,
                       y: self.y - other.y,
                       z: self.z - other.z }
-        }
-    }
-
-    // operator *
-    #[inline]
-    impl Mul for Vector3 {
-        type Output = Vector3;
-        fn mul(self, other: Vector3) -> Vector3 {
-            Vector3 { x: self.x * other.x,
-                      y: self.y * other.y,
-                      z: self.z * other.z }
         }
     }
 
@@ -181,7 +170,7 @@ fn ortho_basis(n: vector3::Vector3) -> [vector3::Vector3; 3] {
 }
 
 #[allow(deprecated)]
-fn ambient_occlusion(isect: &mut IntersectInfo,
+fn ambient_occlusion(isect: &IntersectInfo,
                      objects: &[Object]) -> f32 {
     let eps = 0.0001f32;
     let ntheta = NAO_SAMPLES;
@@ -194,7 +183,7 @@ fn ambient_occlusion(isect: &mut IntersectInfo,
         position: vector3::new(0.0, 0.0, 0.0),
         normal: vector3::new(0.0, 1.0, 0.0)
     };
-    let tau: f32 = std::f32::consts::PI;
+    let tau: f32 = std::f32::consts::PI * 2.0;
 
     for _ in 0..ntheta {
         for _ in 0..nphi {
