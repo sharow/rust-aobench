@@ -80,6 +80,7 @@ mod vector3 {
             }
         }
     }
+
     impl Clone for Vector3 {
         fn clone(&self) -> Self {
             Vector3 { x: self.x, y: self.y, z: self.z }
@@ -192,7 +193,7 @@ fn ambient_occlusion(isect: &IntersectInfo,
 
             let x = phi.cos() * theta;
             let y = phi.sin() * theta;
-            let z = (1.0f32 - theta * theta).sqrt();
+            let z = (1.0 - theta * theta).sqrt();
 
             // local -> global
             let direction = vector3::Vector3 {
@@ -239,24 +240,25 @@ impl Pixel {
 
 fn render(width: u32, height: u32,
           nsubsamples: u32, objects: &[Object]) -> Vec<Pixel> {
+    let w = width as f32;
+    let h = height as f32;
+    let cx = w / 2.0;
+    let cy = h / 2.0;
     let mut pixels: Vec<Pixel> = Vec::with_capacity((width * height) as usize);
     let sample: f32 = nsubsamples as f32;
-    let w: f32 = width as f32;
-    let h: f32 = height as f32;
-    for _y in 0u32..height {
-        for _x in 0u32..width {
+    for y in 0u32..height {
+        for x in 0u32..width {
             let mut occlusion = 0.0f32;
-            for _u in 0u32..nsubsamples {
-                for _v in 0u32..nsubsamples {
-                    let x = _x as f32;
-                    let y = _y as f32;
-                    let u = _u as f32;
-                    let v = _v as f32;
-                    let px = (x + (u / sample) - (w / 2.0)) / (w / 2.0);
-                    let py = -(y + (v / sample) - (h / 2.0)) / (h / 2.0);
+            for u in 0u32..nsubsamples {
+                for v in 0u32..nsubsamples {
+                    let x = x as f32;
+                    let y = y as f32;
+                    let u = u as f32;
+                    let v = v as f32;
+                    let px =  (x + (u / sample) - cx) / cx;
+                    let py = -(y + (v / sample) - cy) / cy;
                     let ray = Ray { origin: vector3::new(0.0, 0.0, 0.0),
                                     direction: vector3::new_normal(px, py, -1.0) };
-
                     let mut isect = IntersectInfo {
                         distance: 1.0e+17,
                         position: vector3::new(0.0, 0.0, 0.0),
@@ -264,12 +266,9 @@ fn render(width: u32, height: u32,
                     };
                     let mut hit = false;
                     for o in objects.iter() {
-                        let h = o.intersect(&ray, &mut isect);
-                        hit = (hit || h);
+                        hit = (hit || o.intersect(&ray, &mut isect));
                     }
-                    if hit {
-                        occlusion += ambient_occlusion(&mut isect, objects);
-                    }
+                    occlusion += if hit { ambient_occlusion(&mut isect, objects) } else { 0.0 };
                 }
             }
             if occlusion > 0.0001 {
