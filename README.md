@@ -12,7 +12,7 @@ rand = "0.3.8"
 ## Build & Run
 ```
 $ rustc --version
-rustc 1.0.0-beta.5 (built 2015-05-14)
+rustc 1.0.0-beta.5 (built 2015-05-16)
 
 $ cargo update
 $ cargo run --release
