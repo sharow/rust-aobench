@@ -18,12 +18,10 @@ mod vector3 {
         pub z: f32
     }
 
-    #[inline]
     pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
         Vector3 { x: x, y: y, z: z }
     }
 
-    #[inline]
     pub fn new_normal(x: f32, y: f32, z: f32) -> Vector3 {
         let mut v = Vector3 { x: x, y: y, z: z };
         v.normalized();
@@ -31,7 +29,6 @@ mod vector3 {
     }
 
     // operator +
-    #[inline]
     impl Add for Vector3 {
         type Output = Vector3;
         fn add(self, other: Vector3) -> Vector3 {
@@ -42,7 +39,6 @@ mod vector3 {
     }
 
     // operator -
-    #[inline]
     impl Sub for Vector3 {
         type Output = Vector3;
         fn sub(self, other: Vector3) -> Vector3 {
@@ -52,25 +48,21 @@ mod vector3 {
         }
     }
 
-    #[inline]
     pub fn dot(v0: &Vector3, v1: &Vector3) -> f32 {
         v0.x * v1.x + v0.y * v1.y + v0.z * v1.z
     }
 
-    #[inline]
     pub fn cross(v0: &Vector3, v1: &Vector3) -> Vector3 {
         Vector3 { x: v0.y * v1.z - v0.z * v1.y,
                   y: v0.z * v1.x - v0.x * v1.z,
                   z: v0.x * v1.y - v0.y * v1.x }
     }
 
-    #[inline]
     pub fn scale(v: &Vector3, s: f32) -> Vector3 {
         Vector3 { x: v.x * s, y: v.y * s, z: v.z * s }
     }
 
     impl Vector3 {
-        #[inline]
         pub fn normalized(&mut self) {
             let length = dot(self, self).sqrt();
             if (length < -1.0e-9) || (length > 1.0e-9) {
