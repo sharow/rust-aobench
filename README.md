@@ -16,7 +16,6 @@ rustc 1.8.0
 
 $ cargo update
 $ cargo run --release
-cargo run --release
   Compiling libc v0.2.10
   Compiling rand v0.3.14
   Compiling aobench v0.0.3 (file:///...)
